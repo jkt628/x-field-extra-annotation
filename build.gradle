@@ -1,7 +1,11 @@
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+
 plugins {
 	id 'java'
+	id 'idea'
 	id 'org.springframework.boot' version '2.7.11'
 	id 'io.spring.dependency-management' version '1.1.0'
+	id 'org.openapi.generator' version '6.5.0'
 }
 
 group = 'com.example'
@@ -13,10 +17,36 @@ repositories {
 }
 
 dependencies {
+	implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
+	implementation 'org.springdoc:springdoc-openapi-ui:1.7.0'
 	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	runtimeOnly 'mysql:mysql-connector-java:8.0.33'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+String eventRouter = "$rootDir/eventRouter.yaml"
+
+tasks.register('generateEventRouter', GenerateTask) {
+	generatorName.set("spring")
+	inputSpec.set(eventRouter)
+	outputDir.set("$buildDir/generated/openapi")
+	apiPackage.set("com.example.demo.eventRouter.rest")
+	modelPackage.set("com.example.demo.eventRouter.model")
+	configOptions.set([
+		interfaceOnly: "true"
+	])
+}
+compileJava.dependsOn generateEventRouter
+processResources.dependsOn generateEventRouter
+processTestResources.dependsOn generateEventRouter
+sourceSets.main.java.srcDir("$buildDir/generated/openapi/src/main/java")
+
+clean.doFirst {
+	delete("$projectDir/.openapi-generator")
 }

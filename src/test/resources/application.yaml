@@ -1,0 +1,10 @@
+debug: true
+logging:
+  level:
+    root: debug
+    org.hibernate: debug
+    org.springframework: debug
+spring.datasource:
+  username: event_router
+  password: lurker
+  url: jdbc:mysql://localhost:3306/EVENTS?useSSL=false&autoReconnect=true

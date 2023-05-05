@@ -1,0 +1,126 @@
+openapi: '3.0.3'
+info:
+  title: eventRouter
+  description: REST interface to Event Router
+  version: 1.0
+servers:
+- url: http://localhost:8080/v1
+
+components:
+  schemas:
+
+    Accounting:
+      type: object
+      properties:
+        actor:
+          type: string
+        timestamp_ms:
+          type: integer
+          format: int64
+          description: Unix time * 1000 + milliseconds
+          minimum: 1682097138494 # the time of this writing
+
+    GUID:
+      type: string
+      pattern: '^[0-9A-Fa-f]{8}-(?:[0-9A-Fa-f]{4}-){3}[0-9A-Fa-f]{12}$'
+
+    Event:
+      type: object
+      properties:
+        description:
+          type: string
+        timestamp_ms:
+          type: integer
+          format: int64
+          description: Unix time * 1000 + milliseconds
+          minimum: 1682097138494 # the time of this writing
+        info:
+          type: object
+          additionalProperties: true
+        version:
+          type: string
+          pattern: '^\d{1,2}\.\d{1,3}$'
+      required:
+      - description
+      - info
+      - timestamp_ms
+
+    EventRouterMessage:
+      type: object
+      x-class-extra-annotation: |-
+        @javax.persistence.Entity
+        @javax.persistence.Table(name="event_router_requests")
+      properties:
+        guid:
+          x-field-extra-annotation: |-
+            @javax.persistence.Id
+          $ref: '#/components/schemas/GUID'
+        accounting:
+          $ref: '#/components/schemas/Accounting'
+        event:
+          $ref: '#/components/schemas/Event'
+
+    Success:
+      type: object
+      properties:
+        guid:
+          $ref: '#/components/schemas/GUID'
+
+paths:
+
+  /events:
+    post:
+      description: create a new Event
+      operationId: postEvent
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+      responses:
+        '200':
+          description: created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        default:
+          description: failed
+
+  /events/{guid}:
+    get:
+      description: query Event history
+      operationId: getEventByGUID
+      parameters:
+      - name: guid
+        in: path
+        required: true
+        description: the associated GUID when Event created
+        schema:
+          $ref: '#/components/schemas/GUID'
+      - name: count
+        in: query
+        required: false
+        description: |
+          count of history records to retrieve:
+          1 or 'current', the default, indicates current.
+          0 or 'all' indicates all records.
+          any other positive integer limits the response.
+        schema:
+          type: string
+          pattern: '^(?:current|all|\d+)$'
+      responses:
+        '200':
+          description: current state of Event
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+        '400':
+          description: count is not 'current' or 'all' or non-negative integer
+        '404':
+          description: Event not found
+        default:
+          description: failed
