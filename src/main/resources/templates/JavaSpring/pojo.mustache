@@ -31,6 +31,7 @@ public class {{classname}}{{#parent}} extends {{{parent}}}{{/parent}}{{^parent}}
 {{#serializableModel}}
 
   private static final long serialVersionUID = 1L;
+  @javax.persistence.Id
 {{/serializableModel}}
   {{#vars}}
 

@@ -40,7 +40,8 @@ tasks.register('generateEventRouter', GenerateTask) {
 	apiPackage.set("com.example.demo.eventRouter.rest")
 	modelPackage.set("com.example.demo.eventRouter.model")
 	configOptions.set([
-		interfaceOnly: "true"
+		interfaceOnly: "true",
+		serializableModel: "true",
 	])
 }
 compileJava.dependsOn generateEventRouter
