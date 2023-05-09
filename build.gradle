@@ -36,6 +36,7 @@ tasks.register('generateEventRouter', GenerateTask) {
 	generatorName.set("spring")
 	inputSpec.set(eventRouter)
 	outputDir.set("$buildDir/generated/openapi")
+	templateDir.set("$projectDir/src/main/resources/templates/JavaSpring")
 	apiPackage.set("com.example.demo.eventRouter.rest")
 	modelPackage.set("com.example.demo.eventRouter.model")
 	configOptions.set([
